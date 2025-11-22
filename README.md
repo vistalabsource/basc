@@ -21,6 +21,7 @@ write(x);
 # if文
 ``` 
 let x : 5;
+
 if x > 10
 {
     write("gt10");
