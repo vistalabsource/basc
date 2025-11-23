@@ -1,1 +1,1 @@
-nuitka.cmd --standalone basc.py
+pyinstaller basc.py
