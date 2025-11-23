@@ -13,7 +13,8 @@ statement:
 	| break ';'
 	| continue ';'
 	| function
-	| return ';';
+	| return ';'
+    | include ';';
 
 assign: 'let' ID ':' expr;
 expr_s: expr;
@@ -28,6 +29,7 @@ continue: 'continue';
 function: 'function' ID (':' param_list)? block;
 param_list: ID (',' ID)*;
 return: 'return' expr?;
+include: 'include' ID
 
 block: '{' statement* '}';
 
@@ -67,4 +69,5 @@ INT: [0-9]+;
 
 WS: [ \t\r\n]+ -> skip;
 COMMENT: '//' ~[\r\n]* -> skip;
+
 LINE_COMMENT: '/*' .*? '*/' -> skip;
