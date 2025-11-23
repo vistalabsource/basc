@@ -122,6 +122,46 @@ class Tree(BasicScriptVisitor):
     def visitReturn(self, ctx):
         value = self.visit(ctx.expr()) if ctx.expr() else None
         raise ReturnExc(value)
+
+     def visitInclude(self, ctx):
+        n = ctx.ID().getText()
+        b_path = os.path.join(os.getcwd(), f"{n}.share")
+        if os.path.isfile(b_path):
+            self._import_basc(b_path)
+            return
+        p_path = os.path.join(os.getcwd(), "pyl", f"{n}.py")
+        if os.path.isfile(p_path):
+            self._import_py(p_path)
+            return
+        raise InterpError(f"[IMPORT_ERROR]: Module '{n}' not found.")
+    
+    def _import_basc(self, path):
+        src = open(path, encoding="utf-8").read()
+        inp = InputStream(src)
+        lex = BasicScriptLexer(inp)
+        stream = CommonTokenStream(lex)
+        parser = BasicScriptParser(stream)
+        parser.removeErrorListeners()
+        parser.addErrorListener(Verbose())
+        tree = parser.program()
+        mod = Tree(loop_limit=self.loop_limit)
+        mod.env = Environment()
+        mod.visit(tree)
+        for k, v in mod.env.var.items():
+            self.env.define(k, v)    
+            
+    def _import_py(self, path):
+        spec = importlib.util.spec_from_file_location("libmodule", path)
+        mod = importlib.util.module_from_spec(spec)
+        try:
+            spec.loader.exec_module(mod)
+        except Exception as e:
+            raise InterpError(f"[IMPORT_ERROR]: Error loading Python module {path}: {e}")
+        exports = getattr(mod, "exports", None)
+        if not isinstance(exports, dict):
+            raise InterpError(f"[IMPORT_ERROR]: Python module {path} must expose an 'exports' dict.")
+        for k, v in exports.items():
+            self.env.define(k, v)
     
     def visitOr(self, ctx):
         l = self.visit(ctx.expr(0))
@@ -279,3 +319,4 @@ class Tree(BasicScriptVisitor):
         if isinstance(value, str):
             return len(value) > 0
         return True
+
