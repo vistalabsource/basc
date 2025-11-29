@@ -1,4 +1,7 @@
-from lib.BasicScriptVisitor import BasicScriptVisitor
+from antlr4 import *
+from lib.BasicScriptVisitor import BasicScripVisitor
+from lib.BasicScriptParser import BasicScriptParser
+from lib.BasicScriptLexer import BasicScriptParser
 from .verbose import *
 from .ReturnExc import ReturnExc
 from .Func import Function
@@ -319,4 +322,5 @@ class Tree(BasicScriptVisitor):
         if isinstance(value, str):
             return len(value) > 0
         return True
+
 
